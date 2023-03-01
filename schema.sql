@@ -5,13 +5,13 @@ DROP TABLE IF EXISTS Users CASCADE;
 
 CREATE TABLE Users (
     user_id int4  AUTO_INCREMENT NOT NULL,
-    first_name varchar(100) NOT NULL,
-    last_name varchar(100) NOT NULL,
+    firstname varchar(100) NOT NULL,
+    lastname varchar(100) NOT NULL,
     password varchar(255) NOT NULL,
     gender varchar(6),
     email varchar(255) UNIQUE NOT NULL,
     hometown varchar(255),
-    dob DATE NOT NULL,
+    birthday DATE NOT NULL,
   CONSTRAINT users_pk PRIMARY KEY (user_id),
   CHECK (first_name IS NOT NULL AND
          last_name IS NOT NULL AND
