@@ -20,6 +20,13 @@ CREATE TABLE Users (
          birthday IS NOT NULL)
 );
 
+CREATE TABLE Friends (
+  user_id1 int4,
+  user_id2 int4,
+  FOREIGN KEY (user_id1) REFERENCES Users(user_id),
+  FOREIGN KEY (user_id2) REFERENCES Users(user_id)
+);
+
 CREATE TABLE Pictures
 (
   picture_id int4  AUTO_INCREMENT,
