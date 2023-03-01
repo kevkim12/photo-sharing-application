@@ -82,11 +82,6 @@ def login():
 		return '''
 			   <form action='login' method='POST'>
 				<input type='text' name='email' id='email' placeholder='email'></input>
-				<input type="text" name="firstname" required></input>
-				<input type="text" name="lastname" required></input>
-				<input type="date" name="birthday" required></input>
-				<input type="text" name="hometown"></input>
-				<select name="gender"></select>
 				<input type='password' name='password' id='password' placeholder='password'></input>
 				<input type='submit' name='submit'></input>
 			   </form></br>
