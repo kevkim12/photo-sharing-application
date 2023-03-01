@@ -13,11 +13,11 @@ CREATE TABLE Users (
     hometown varchar(255),
     birthday DATE NOT NULL,
   CONSTRAINT users_pk PRIMARY KEY (user_id),
-  CHECK (first_name IS NOT NULL AND
-         last_name IS NOT NULL AND
+  CHECK (firstname IS NOT NULL AND
+         lastname IS NOT NULL AND
          password IS NOT NULL AND
          email IS NOT NULL AND
-         dob IS NOT NULL)
+         birthday IS NOT NULL)
 );
 
 CREATE TABLE Pictures
@@ -29,5 +29,3 @@ CREATE TABLE Pictures
   INDEX upid_idx (user_id),
   CONSTRAINT pictures_pk PRIMARY KEY (picture_id)
 );
-INSERT INTO Users (email, password) VALUES ('test@bu.edu', 'test');
-INSERT INTO Users (email, password) VALUES ('test1@bu.edu', 'test');

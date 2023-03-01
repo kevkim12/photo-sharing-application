@@ -23,7 +23,7 @@ app.secret_key = 'super secret string'  # Change this!
 
 #These will need to be changed according to your creditionals
 app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'QAzwsx2121?!'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'cs460cs460'
 app.config['MYSQL_DATABASE_DB'] = 'photoshare'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
@@ -82,6 +82,11 @@ def login():
 		return '''
 			   <form action='login' method='POST'>
 				<input type='text' name='email' id='email' placeholder='email'></input>
+				<input type="text" name="firstname" required></input>
+				<input type="text" name="lastname" required></input>
+				<input type="date" name="birthday" required></input>
+				<input type="text" name="hometown"></input>
+				<select name="gender"></select>
 				<input type='password' name='password' id='password' placeholder='password'></input>
 				<input type='submit' name='submit'></input>
 			   </form></br>
@@ -123,13 +128,18 @@ def register_user():
 	try:
 		email=request.form.get('email')
 		password=request.form.get('password')
+		firstname=request.form.get('firstname')
+		lastname=request.form.get('lastname')
+		gender=request.form.get('gender')
+		hometown=request.form.get('hometown')
+		birthday=request.form.get('birthday')
 	except:
 		print("couldn't find all tokens") #this prints to shell, end users will not see this (all print statements go to shell)
 		return flask.redirect(flask.url_for('register'))
 	cursor = conn.cursor()
 	test =  isEmailUnique(email)
 	if test:
-		print(cursor.execute("INSERT INTO Users (email, password) VALUES ('{0}', '{1}')".format(email, password)))
+		print(cursor.execute("INSERT INTO Users (email, password, firstname, lastname, gender, hometown, birthday) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')".format(email, password, firstname, lastname, gender, hometown, birthday)))
 		conn.commit()
 		#log user in
 		user = User()
