@@ -179,7 +179,8 @@ def friends():
 def add_friend():
 	addfriend = request.form.get('addfriend')
 	print("XXX_DATA_XXX:", addfriend)
-	if cursor.execute("SELECT email  FROM Users WHERE email = '{0}'".format(addfriend)) and cursor.execute("SELECT user_id1 FROM Friends WHERE user_id2 = '{0}'".format(getUserIdFromEmail(addfriend))) == 0:
+	if cursor.execute("SELECT email FROM Users WHERE email = '{0}'".format(addfriend)) and cursor.execute("SELECT * FROM Friends WHERE user_id2 = '{0}' AND user_id1 = '{1}'".format(getUserIdFromEmail(addfriend), getUserIdFromEmail(flask_login.current_user.id))) == 0:
+		print(1)
 		friend_id = getUserIdFromEmail(addfriend)
 		cursor.execute("INSERT INTO Friends (user_id1, user_id2) VALUES ('{0}', '{1}')".format(getUserIdFromEmail(flask_login.current_user.id), friend_id))
 		conn.commit()
@@ -193,6 +194,7 @@ def add_friend():
 				friends_list.append(result[0][0])
 		return render_template('friends.html', friends=friends_list)
 	else:
+		print(2)
 		cursor.execute("SELECT user_id2 FROM Friends WHERE user_id1 = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
 		friendsv = cursor.fetchall()
 		friends_list = []
