@@ -45,3 +45,12 @@ CREATE TABLE Albums
   user_id int4,
   CONSTRAINT albums_pk PRIMARY KEY (album_id)
 );
+
+CREATE TABLE Contains
+(
+  album_id int4,
+  picture_id int4,
+  CONSTRAINT contains_pk PRIMARY KEY (picture_id),
+  FOREIGN KEY (album_id) REFERENCES Albums(album_id),
+  FOREIGN KEY (picture_id) REFERENCES Pictures(picture_id)
+);

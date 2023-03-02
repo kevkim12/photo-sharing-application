@@ -1,0 +1,7 @@
+<t><h2>Photos</h2>
+    <ul>
+        {% for photo in photos %}
+        <li>{{ photo }}<br>
+        <img src='data:image/jpg;base64, {{ base64.b64encode(photo).decode("ascii") }}'/></li>
+        {% endfor %}
+    </ul></t>

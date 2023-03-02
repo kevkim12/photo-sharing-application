@@ -175,12 +175,21 @@ def isEmailUnique(email):
 def protected():
 	return render_template('hello.html', name=flask_login.current_user.id, message="Here's your profile")
 
+@app.route('/albums/<path:subpath>', methods=['GET'])
+def display_photos(subpath):
+    print(subpath)
+    cursor = conn.cursor()
+    cursor.execute("SELECT picture_id FROM Contains WHERE album_id = '{0}'".format(subpath))
+    pids = cursor.fetchall()
+    photos = [row[0] for row in pids]
+    return render_template('photos.html', photos=photos)
+
 @app.route('/userAlbums', methods=['GET'])
 def userAlbums():
 	cursor = conn.cursor()
 	cursor.execute("SELECT album_id, albumname FROM Albums WHERE user_id = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
 	albumsv = cursor.fetchall()
-	albums_list = [(row[1], row[0]) for row in albumsv]
+	albums_list = [(row[1], "albums/" + str(row[0])) for row in albumsv]
 	return render_template('userAlbums.html', albums=albums_list)
 
 @app.route('/userAlbums', methods=['POST'])
