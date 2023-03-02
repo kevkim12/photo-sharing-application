@@ -12,6 +12,7 @@ CREATE TABLE Users (
     email varchar(255) UNIQUE NOT NULL,
     hometown varchar(255),
     birthday DATE NOT NULL,
+    score INTEGER,
   CONSTRAINT users_pk PRIMARY KEY (user_id),
   CHECK (firstname IS NOT NULL AND
          lastname IS NOT NULL AND
@@ -53,4 +54,12 @@ CREATE TABLE Contains
   CONSTRAINT contains_pk PRIMARY KEY (picture_id),
   FOREIGN KEY (album_id) REFERENCES Albums(album_id),
   FOREIGN KEY (picture_id) REFERENCES Pictures(picture_id)
+);
+
+CREATE TABLE Comments
+(
+  commend_id int4 AUTO_INCREMENT NOT NULL UNIQUE,
+  date DATE,
+  text varchar(500),
+  CONSTRAINT (comment_pk) PRIMARY KEY (commend_id)
 );
