@@ -8,16 +8,15 @@
 </head>
 <body>
     <form action="{{ url_for('add_album') }}" method="post">
-        <label for="addAlbum">Make an album:</label>
-        <input type="text" name="addAlbum"/><br />
-        <input type="submit" />
+        <label for="albumname">Make an album:</label>
+        <input type="text" name="albumname"/><br />
+        <button type="submit">Add</button>
       </form>
 
       <h2>Here are your Albums</h2>
     <ul>
-        {% for album in albums %}
-        <li>{{ album }}<br>
-        <a href=""></a></li>
+        {% for album,id in albums %}
+        <li><a href="/{{ id }}">{{ album }}</a></li>
         {% endfor %}
     </ul>
 </body>

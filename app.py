@@ -14,6 +14,9 @@ from flask import Flask, Response, request, render_template, redirect, url_for
 from flaskext.mysql import MySQL
 import flask_login
 
+#for getting current date
+from datetime import date
+
 #for image uploading
 import os, base64
 
@@ -169,6 +172,31 @@ def isEmailUnique(email):
 @flask_login.login_required
 def protected():
 	return render_template('hello.html', name=flask_login.current_user.id, message="Here's your profile")
+
+@app.route('/userAlbums', methods=['GET'])
+def userAlbums():
+	cursor = conn.cursor()
+	cursor.execute("SELECT album_id, albumname FROM Albums WHERE user_id = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
+	albumsv = cursor.fetchall()
+	albums_list = [(row[1], row[0]) for row in albumsv]
+	return render_template('userAlbums.html', albums=albums_list)
+
+@app.route('/userAlbums', methods=['POST'])
+def add_album():
+	albumname=request.form.get('albumname')
+	cursor = conn.cursor()
+	print(albumname)
+	cursor.execute("INSERT INTO Albums (date, albumname, user_id) VALUES ('{0}', '{1}', '{2}')".format(date.today(), albumname, getUserIdFromEmail(flask_login.current_user.id)))
+	conn.commit()
+	cursor.execute("SELECT album_id FROM Albums WHERE user_id = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
+	albumsv = cursor.fetchall()
+	albums_list = []
+	for i in range(len(albumsv)):
+		cursor.execute("SELECT albumname FROM Albums WHERE album_id = '{0}'".format(albumsv[i][0]))
+		result = cursor.fetchall()
+		if result:
+			albums_list.append(result[0][0])
+	return render_template('userAlbums.html', albums=albums_list)
 
 @app.route("/friends", methods=['GET'])
 def friends():
