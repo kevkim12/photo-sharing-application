@@ -27,6 +27,8 @@ CREATE TABLE Friends (
   FOREIGN KEY (user_id2) REFERENCES Users(user_id)
 );
 
+
+
 CREATE TABLE Pictures
 (
   picture_id int4  AUTO_INCREMENT,
