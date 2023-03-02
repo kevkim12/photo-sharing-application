@@ -170,6 +170,17 @@ def isEmailUnique(email):
 def protected():
 	return render_template('hello.html', name=flask_login.current_user.id, message="Here's your profile")
 
+@app.route("/friends", methods=['GET'])
+def friends():
+	return render_template('friends.html', name=flask_login.current_user.id, message="Here's your friends")
+
+@app.route('/friends', methods=['POST'])
+@flask_login.login_required
+def add_friend():
+	addfriend = request.form.get('addfriend')
+	print("XXX_DATA_XXX:", addfriend)
+	return render_template('friends.html', name=flask_login.current_user.id, message="Here's your friends")
+
 #begin photo uploading code
 # photos uploaded using base64 encoding so they can be directly embeded in HTML
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
