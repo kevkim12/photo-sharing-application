@@ -81,6 +81,11 @@ def new_page_function():
 	return new_page_html
 '''
 
+def getAlbumPhotos(aid):
+    cursor = conn.cursor()
+    cursor.execute("SELECT imgdata, picture_id, caption FROM Pictures WHERE picture_id IN (SELECT picture_id FROM Contains WHERE album_id = '{0}')".format(aid))
+    return cursor.fetchall() #NOTE return a list of tuples, [(imgdata, pid, caption), ...]
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 	if flask.request.method == 'GET':
@@ -177,12 +182,7 @@ def protected():
 
 @app.route('/albums/<path:subpath>', methods=['GET'])
 def display_photos(subpath):
-    print(subpath)
-    cursor = conn.cursor()
-    cursor.execute("SELECT picture_id FROM Contains WHERE album_id = '{0}'".format(subpath))
-    pids = cursor.fetchall()
-    photos = [row[0] for row in pids]
-    return render_template('photos.html', photos=photos)
+    return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
 
 @app.route('/userAlbums', methods=['GET'])
 def userAlbums():
@@ -254,11 +254,6 @@ def add_friend():
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 def allowed_file(filename):
 	return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
-def getAlbumPhotos(aid):
-    cursor = conn.cursor()
-    cursor.execute("SELECT imgdata, picture_id, caption FROM Pictures WHERE picture_id IN (SELECT picture_id FROM Contains WHERE album_id = '{0}')".format(aid))
-    return cursor.fetchall() #NOTE return a list of tuples, [(imgdata, pid, caption), ...]
 
 @app.route('/upload', methods=['GET', 'POST'])
 @flask_login.login_required
