@@ -266,12 +266,15 @@ def upload_file():
 		cursor = conn.cursor()
 		cursor.execute("INSERT INTO Pictures (imgdata, user_id, caption) VALUES (%s, %s, %s )", (photo_data, uid, caption))
 		conn.commit()
+		cursor.execute("SELECT album_id FROM Albums WHERE user_id = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
 		aid = cursor.fetchall()
+		cursor.execute("SELECT picture_id FROM Pictures WHERE user_id = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
 		pid = cursor.fetchall()
+		print("aid: ", aid)
+		print("pid: ", pid)
 		cursor.execute('''INSERT INTO Contains (album_id, picture_id) VALUES (%s, %s)''', (aid[0][0], pid[-1][0]))
 		conn.commit()
 		return render_template('photos.html', photos=getAlbumPhotos(aid[0][0]), base64=base64)
-		#return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=getUsersPhotos(uid), base64=base64)
 	#The method is GET so we return a  HTML form to upload the a photo.
 	else:
 		print("oo")
