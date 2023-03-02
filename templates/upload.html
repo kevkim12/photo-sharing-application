@@ -13,6 +13,9 @@
                 <input type="text" name="caption" required='true' /><br />
                 <select name="album" required="true">
                     <option value="">Select an album</option>
+                    {% for album in albums %}
+                    <option value="{{album}}">{{album}}</option>
+                    {% endfor %}
                 </select>
                 <input type="submit" value="Upload" />
             </form>
