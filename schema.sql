@@ -27,14 +27,20 @@ CREATE TABLE Friends (
   FOREIGN KEY (user_id2) REFERENCES Users(user_id)
 );
 
-
-
 CREATE TABLE Pictures
 (
-  picture_id int4  AUTO_INCREMENT,
+  picture_id int4 AUTO_INCREMENT NOT NULL UNIQUE,
   user_id int4,
   imgdata longblob ,
   caption VARCHAR(255),
   INDEX upid_idx (user_id),
   CONSTRAINT pictures_pk PRIMARY KEY (picture_id)
+);
+
+CREATE TABLE Albums
+(
+  album_id int4 AUTO_INCREMENT NOT NULL UNIQUE,
+  date DATE,
+  albumname varchar(255),
+  CONSTRAINT albums_pk PRIMARY KEY (album_id)
 );
