@@ -190,14 +190,9 @@ def add_album():
 	print(albumname)
 	cursor.execute("INSERT INTO Albums (date, albumname, user_id) VALUES ('{0}', '{1}', '{2}')".format(date.today(), albumname, getUserIdFromEmail(flask_login.current_user.id)))
 	conn.commit()
-	cursor.execute("SELECT album_id FROM Albums WHERE user_id = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
+	cursor.execute("SELECT album_id, albumname FROM Albums WHERE user_id = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
 	albumsv = cursor.fetchall()
-	albums_list = []
-	for i in range(len(albumsv)):
-		cursor.execute("SELECT albumname FROM Albums WHERE album_id = '{0}'".format(albumsv[i][0]))
-		result = cursor.fetchall()
-		if result:
-			albums_list.append(result[0][0])
+	albums_list = [(row[1], row[0]) for row in albumsv]
 	return render_template('userAlbums.html', albums=albums_list)
 
 @app.route("/friends", methods=['GET'])
