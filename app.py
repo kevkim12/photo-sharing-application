@@ -81,7 +81,7 @@ def login():
 	if flask.request.method == 'GET':
 		return '''
 			   <form action='login' method='POST'>
-				<input type='text' name='email' id='email' placeholder='email'></input>
+				<input type='email' name='email' id='email' placeholder='email'></input>
 				<input type='password' name='password' id='password' placeholder='password'></input>
 				<input type='submit' name='submit'></input>
 			   </form></br>
