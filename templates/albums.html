@@ -7,11 +7,10 @@
     <title>Albums</title>
 </head>
 <body>
-    <h1>Albums</h1>
+      <h2>Browse Albums</h2>
     <ul>
-        {% for album in albums %}
-        <li>{{ album }}<br>
-        <a href=""></a></li>
+        {% for album,id in albums %}
+        <li><a href="/{{ id }}">{{ album }}</a></li>
         {% endfor %}
     </ul>
 </body>

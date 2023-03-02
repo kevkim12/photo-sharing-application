@@ -283,6 +283,15 @@ def upload_file():
 		return render_template('upload.html', albums=albums_list)
 #end photo uploading code
 
+@app.route('/albums', methods=['GET'])
+def display_albums():
+	cursor = conn.cursor()
+	cursor.execute("SELECT album_id, albumname FROM Albums")
+	albumsv = cursor.fetchall()
+	albums_list = [(row[1], "albums/" + str(row[0])) for row in albumsv]
+	return render_template('albums.html', albums=albums_list)
+
+
 #default page
 @app.route("/", methods=['GET'])
 def hello():
