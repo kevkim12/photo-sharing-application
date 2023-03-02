@@ -19,7 +19,7 @@ import os, base64
 
 mysql = MySQL()
 app = Flask(__name__)
-app.secret_key = 'super secret string'  # Change this!
+app.secret_key = 'cs460projectkevinkimjiahaohuamani'  # Change this!
 
 #These will need to be changed according to your creditionals
 app.config['MYSQL_DATABASE_USER'] = 'root'
@@ -152,7 +152,7 @@ def getUsersPhotos(uid):
 
 def getUserIdFromEmail(email):
 	cursor = conn.cursor()
-	cursor.execute("SELECT user_id  FROM Users WHERE email = '{0}'".format(email))
+	cursor.execute("SELECT user_id FROM Users WHERE email = '{0}'".format(email))
 	return cursor.fetchone()[0]
 
 def isEmailUnique(email):
@@ -179,7 +179,29 @@ def friends():
 def add_friend():
 	addfriend = request.form.get('addfriend')
 	print("XXX_DATA_XXX:", addfriend)
-	return render_template('friends.html', name=flask_login.current_user.id, message="Here's your friends")
+	if cursor.execute("SELECT email  FROM Users WHERE email = '{0}'".format(addfriend)) and cursor.execute("SELECT user_id1 FROM Friends WHERE user_id2 = '{0}'".format(getUserIdFromEmail(addfriend))) == 0:
+		friend_id = getUserIdFromEmail(addfriend)
+		cursor.execute("INSERT INTO Friends (user_id1, user_id2) VALUES ('{0}', '{1}')".format(getUserIdFromEmail(flask_login.current_user.id), friend_id))
+		conn.commit()
+		cursor.execute("SELECT user_id2 FROM Friends WHERE user_id1 = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
+		friendsv = cursor.fetchall()
+		friends_list = []
+		for i in range(len(friendsv)):
+			cursor.execute("SELECT email FROM Users WHERE user_id = '{0}'".format(friendsv[i][0]))
+			result = cursor.fetchall()
+			if result:
+				friends_list.append(result[0][0])
+		return render_template('friends.html', friends=friends_list)
+	else:
+		cursor.execute("SELECT user_id2 FROM Friends WHERE user_id1 = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
+		friendsv = cursor.fetchall()
+		friends_list = []
+		for i in range(len(friendsv)):
+			cursor.execute("SELECT email FROM Users WHERE user_id = '{0}'".format(friendsv[i][0]))
+			result = cursor.fetchall()
+			if result:
+				friends_list.append(result[0][0])
+		return render_template('friends.html', friends=friends_list)
 
 #begin photo uploading code
 # photos uploaded using base64 encoding so they can be directly embeded in HTML
@@ -203,7 +225,6 @@ def upload_file():
 	else:
 		return render_template('upload.html')
 #end photo uploading code
-
 
 #default page
 @app.route("/", methods=['GET'])
