@@ -42,5 +42,6 @@ CREATE TABLE Albums
   album_id int4 AUTO_INCREMENT NOT NULL UNIQUE,
   date DATE,
   albumname varchar(255),
+  user_id int4,
   CONSTRAINT albums_pk PRIMARY KEY (album_id)
 );
