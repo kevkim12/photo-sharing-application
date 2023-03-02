@@ -172,7 +172,15 @@ def protected():
 
 @app.route("/friends", methods=['GET'])
 def friends():
-	return render_template('friends.html', name=flask_login.current_user.id, message="Here's your friends")
+	cursor.execute("SELECT user_id2 FROM Friends WHERE user_id1 = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
+	friendsv = cursor.fetchall()
+	friends_list = []
+	for i in range(len(friendsv)):
+		cursor.execute("SELECT email FROM Users WHERE user_id = '{0}'".format(friendsv[i][0]))
+		result = cursor.fetchall()
+		if result:
+			friends_list.append(result[0][0])
+	return render_template('friends.html', friends=friends_list)
 
 @app.route('/friends', methods=['POST'])
 @flask_login.login_required
@@ -183,6 +191,8 @@ def add_friend():
 		print(1)
 		friend_id = getUserIdFromEmail(addfriend)
 		cursor.execute("INSERT INTO Friends (user_id1, user_id2) VALUES ('{0}', '{1}')".format(getUserIdFromEmail(flask_login.current_user.id), friend_id))
+		conn.commit()
+		cursor.execute("INSERT INTO Friends (user_id1, user_id2) VALUES ('{0}', '{1}')".format(friend_id, getUserIdFromEmail(flask_login.current_user.id)))
 		conn.commit()
 		cursor.execute("SELECT user_id2 FROM Friends WHERE user_id1 = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
 		friendsv = cursor.fetchall()
