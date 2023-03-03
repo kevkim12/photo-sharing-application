@@ -194,6 +194,7 @@ def add_comment(subpath):
 		if "photo" in subpath:
 			print("gggggggg")
 			picture_id = request.form.get('picture_id')
+			uid = getUserIdFromEmail(flask_login.current_user.id)
 			# cursor.execute("SELECT user_id FROM Pictures WHERE picture_id = '{0}')".format(picture_id))
 			# userv = cursor.fetchall()
 			# print(userv)
@@ -204,6 +205,8 @@ def add_comment(subpath):
 			cursor.execute("SELECT comment_id FROM Comments WHERE text = '{0}'".format(addcomment))
 			cid = cursor.fetchall()
 			cursor.execute("INSERT INTO Has (comment_id, picture_id) VALUES ('{0}', '{1}')".format(cid[0][0], picture_id))
+			conn.commit()
+			cursor.execute("UPDATE Users Set score = score + 1 WHERE user_id = '{0}'".format(uid))
 			conn.commit()
 			cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(picture_id))
 			commentsv = cursor.fetchall()
