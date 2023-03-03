@@ -4,7 +4,7 @@
     <link href="/minimal-table.css" rel="stylesheet" type="text/css">
   </head>
   <body>
-    <h1>Leaderboard</h1>
+    <h1>Top Contributors</h1>
     <table>
       <thead>
         <tr>
@@ -16,6 +16,23 @@
         {% for email, score in leaderboard %}
           <tr>
             <td>{{ email }}</td>
+            <td>{{ score }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <h1>Popular Tags</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Tag</th>
+          <th>Mentions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tag, score in tagleaderboard %}
+          <tr>
+            <td>{{ tag }}</td>
             <td>{{ score }}</td>
           </tr>
         {% endfor %}

@@ -286,14 +286,20 @@ def upload_file():
 		while True:
 			try:
 				tag_val = request.form.get("tag" + str(tag_num))
+				if tag_val == None:
+					break
 				tag_num += 1
 				if tag_val != "":
 					if tag_val not in added_words:
 						added_words.append(tag_val)
-						cursor.execute("INSERT INTO Tag (word) VALUES ('{0}')".format(tag_val))
-						conn.commit()
-						cursor.execute("INSERT INTO Associate (picture_id, word) VALUES ('{0}', '{1}')".format(pid[-1][0], tag_val))
-						conn.commit()
+						if cursor.execute("SELECT word FROM Tag WHERE word = '{0}'".format(tag_val)) == 0:
+							cursor.execute("INSERT INTO Tag (word) VALUES ('{0}')".format(tag_val))
+							conn.commit()
+							cursor.execute("INSERT INTO Associate (picture_id, word) VALUES ('{0}', '{1}')".format(pid[-1][0], tag_val))
+							conn.commit()
+						else:
+							cursor.execute("INSERT INTO Associate (picture_id, word) VALUES ('{0}', '{1}')".format(pid[-1][0], tag_val))
+							conn.commit()
 				elif tag_val == None:
 					break
 			except:
@@ -324,7 +330,10 @@ def display_leaderboard():
 	cursor.execute("SELECT email,score FROM USERS ORDER BY score DESC LIMIT 10")
 	leaderboardv = cursor.fetchall()
 	leaderboard_list = [(row[0], row[1]) for row in leaderboardv]
-	return render_template('leaderboard.html', leaderboard=leaderboard_list)
+	cursor.execute("SELECT Tag.word, COUNT(*) AS count FROM Tag JOIN Associate ON Tag.word = Associate.word GROUP BY Tag.word ORDER BY count DESC LIMIT 3")
+	tagleaderboardv = cursor.fetchall()
+	tagleaderboard_list = [(row[0], row[1]) for row in tagleaderboardv]
+	return render_template('leaderboard.html', leaderboard=leaderboard_list, tagleaderboard=tagleaderboard_list)
 
 
 #default page
