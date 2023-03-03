@@ -189,14 +189,11 @@ def isEmailUnique(email):
 @flask_login.login_required
 def protected():
 	return render_template('hello.html', name=flask_login.current_user.id, message="Here's your profile")
-@app.route('/albums/<path:subpath>', methods=['POST'])
+@app.route('/albums/<path:subpath>/add_comment', methods=['POST'])
 def add_comment(subpath):
 		if "photo" in subpath:
 			print("gggggggg")
 			picture_id = request.form.get('picture_id')
-			# cursor.execute("SELECT user_id FROM Pictures WHERE picture_id = '{0}')".format(picture_id))
-			# userv = cursor.fetchall()
-			# print(userv)
 			addcomment = request.form.get('addcomment')
 			cursor = conn.cursor()
 			cursor.execute("INSERT INTO Comments (text) VALUES ('{0}')".format(addcomment))
@@ -208,7 +205,62 @@ def add_comment(subpath):
 			cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(picture_id))
 			commentsv = cursor.fetchall()
 			comments_list = [(row[0]) for row in commentsv]
-			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=True, base64=base64)
+
+			cursor.execute("SELECT user_id, picture_id FROM Likes WHERE user_id = '{0}' AND picture_id = '{1}'".format(getUserIdFromEmail(flask_login.current_user.id), picture_id))
+			studd = cursor.fetchall()
+			if len(studd) == 0:
+				liked = False
+			else:
+				liked = True
+			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=True, liked=liked, base64=base64)
+		else:
+			#for albums
+			print("<><><><><>><")
+			return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
+
+@app.route('/albums/<path:subpath>/add_like', methods=['POST'])
+def add_like(subpath):
+		if "photo" in subpath:
+			picture_id = request.form.get('picture_id')
+			cursor = conn.cursor()
+			cursor.execute("INSERT INTO Likes (user_id, picture_id) VALUES ('{0}', '{1}')".format(getUserIdFromEmail(flask_login.current_user.id), picture_id))
+			conn.commit()
+			cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(picture_id))
+			commentsv = cursor.fetchall()
+			comments_list = [(row[0]) for row in commentsv]
+			liked=True
+
+			cursor.execute("SELECT user_id FROM Pictures WHERE picture_id = '{0}'".format(picture_id))
+			userv = cursor.fetchall()
+			if userv[0][0] == getUserIdFromEmail(flask_login.current_user.id):
+				nosame = False
+			else:
+				nosame = True
+			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=nosame, liked=liked, base64=base64)
+		else:
+			#for albums
+			print("<><><><><>><")
+			return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
+		
+@app.route('/albums/<path:subpath>?add_unlike', methods=['POST'])
+def add_unlike(subpath):
+		if "photo" in subpath:
+			picture_id = request.form.get('picture_id')
+			cursor = conn.cursor()
+			cursor.execute("DELETE FROM Likes WHERE user_id = '{0}' AND picture_id = '{1}'".format(getUserIdFromEmail(flask_login.current_user.id), picture_id))
+			conn.commit()
+			cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(picture_id))
+			commentsv = cursor.fetchall()
+			comments_list = [(row[0]) for row in commentsv]
+			liked=False
+
+			cursor.execute("SELECT user_id FROM Pictures WHERE picture_id = '{0}'".format(picture_id))
+			userv = cursor.fetchall()
+			if userv[0][0] == getUserIdFromEmail(flask_login.current_user.id):
+				nosame = False
+			else:
+				nosame = True
+			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=nosame, liked=liked, base64=base64)
 		else:
 			#for albums
 			print("<><><><><>><")
@@ -229,7 +281,13 @@ def display_photos(subpath):
 		cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(ns[0]))
 		commentsv = cursor.fetchall()
 		comments_list = [(row[0]) for row in commentsv]
-		return render_template('photo.html', photo=getPhotoDetails(ns[0]), comments=comments_list, notsame=nosame, base64=base64)
+		cursor.execute("SELECT user_id, picture_id FROM Likes WHERE user_id = '{0}' AND picture_id = '{1}'".format(getUserIdFromEmail(flask_login.current_user.id), ns[0]))
+		studd = cursor.fetchall()
+		if len(studd) == 0:
+			liked = False
+		else:
+			liked = True
+		return render_template('photo.html', photo=getPhotoDetails(ns[0]), comments=comments_list, notsame=nosame,liked=liked, base64=base64)
 	else:
 		#for albums
 		return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
