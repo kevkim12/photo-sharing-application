@@ -144,7 +144,7 @@ def register_user():
 	cursor = conn.cursor()
 	test =  isEmailUnique(email)
 	if test:
-		print(cursor.execute("INSERT INTO Users (email, password, firstname, lastname, gender, hometown, birthday) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')".format(email, password, firstname, lastname, gender, hometown, birthday)))
+		print(cursor.execute("INSERT INTO Users (email, password, firstname, lastname, gender, hometown, birthday, score) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')".format(email, password, firstname, lastname, gender, hometown, birthday, 0)))
 		conn.commit()
 		#log user in
 		user = User()
@@ -276,6 +276,8 @@ def upload_file():
 		print("pid: ", pid)
 		cursor.execute('''INSERT INTO Contains (album_id, picture_id) VALUES (%s, %s)''', (aid[0][0], pid[-1][0]))
 		conn.commit()
+		cursor.execute("UPDATE Users Set score = score + 1 WHERE user_id = '{0}'".format(uid))
+		conn.commit()
 		return render_template('photos.html', photos=getAlbumPhotos(aid[0][0]), base64=base64)
 	#The method is GET so we return a  HTML form to upload the a photo.
 	else:
@@ -295,6 +297,14 @@ def display_albums():
 	albumsv = cursor.fetchall()
 	albums_list = [(row[1], "albums/" + str(row[0])) for row in albumsv]
 	return render_template('albums.html', albums=albums_list)
+
+@app.route('/leaderboard', methods=['GET'])
+def display_leaderboard():
+	cursor = conn.cursor()
+	cursor.execute("SELECT email,score FROM USERS ORDER BY score DESC LIMIT 10")
+	leaderboardv = cursor.fetchall()
+	leaderboard_list = [(row[0], row[1]) for row in leaderboardv]
+	return render_template('leaderboard.html', leaderboard=leaderboard_list)
 
 
 #default page
