@@ -59,6 +59,8 @@ def user_loader(email):
 	user.id = email
 	return user
 
+login_status = False
+
 @login_manager.request_loader
 def request_loader(request):
 	users = getUserList()
@@ -71,8 +73,12 @@ def request_loader(request):
 	cursor.execute("SELECT password FROM Users WHERE email = '{0}'".format(email))
 	data = cursor.fetchall()
 	pwd = str(data[0][0] )
-	user.is_authenticated = request.form['password'] == pwd
-	return user
+	print("REQUEST:", request.form['password'], "PWD:", pwd)
+	if login_status == False:
+		return
+	else:
+		user.is_authenticated = request.form['password'] == pwd
+		return user
 
 '''
 A new page looks like this:
@@ -131,6 +137,7 @@ def unauthorized_handler():
 #you can specify specific methods (GET/POST) in function header instead of inside the functions as seen earlier
 @app.route("/register", methods=['GET'])
 def register():
+	login_status = True
 	return render_template('register.html', suppress=False)
 
 @app.route("/register", methods=['POST'])
@@ -144,6 +151,7 @@ def register_user():
 		hometown=request.form.get('hometown')
 		birthday=request.form.get('birthday')
 	except:
+		login_status = False
 		print("couldn't find all tokens") #this prints to shell, end users will not see this (all print statements go to shell)
 		return flask.redirect(flask.url_for('register'))
 	cursor = conn.cursor()
@@ -155,11 +163,13 @@ def register_user():
 		user = User()
 		user.id = email
 		flask_login.login_user(user)
+		login_status = True
 		return render_template('hello.html', name=email, message='Account Created!')
 	else:
 		print("couldn't find all tokens")
 		print('oof')
-		return flask.redirect(flask.url_for('register', suppress=True))
+		login_status = False
+		return render_template('register.html', suppress=True)
 
 def getUsersPhotos(uid):
 	cursor = conn.cursor()
