@@ -68,4 +68,13 @@ CREATE TABLE Tag
 (
   word varchar(255) NOT NULL UNIQUE,
   PRIMARY KEY (word)
-)
+);
+
+CREATE TABLE Associate
+(
+  picture_id int4,
+  word varchar(255),
+  CONSTRAINT associate_pk PRIMARY KEY (picture_id, word),
+  FOREIGN KEY (picture_id) REFERENCES Pictures(picture_id),
+  FOREIGN KEY (word) REFERENCES Tag(word)
+);

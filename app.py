@@ -281,6 +281,21 @@ def upload_file():
 		conn.commit()
 		cursor.execute("UPDATE Users Set score = score + 1 WHERE user_id = '{0}'".format(uid))
 		conn.commit()
+		tag_num = 1
+		while True:
+			try:
+				tag_val = request.form.get("tag" + str(tag_num))
+				tag_num += 1
+				if tag_val != "":
+					cursor.execute("INSERT INTO Tag (word) VALUES ('{0}')".format(tag_val))
+					conn.commit()
+					cursor.execute("INSERT INTO Associate (picture_id, word) VALUES ('{0}', '{1}')".format(pid[-1][0], tag_val))
+					conn.commit()
+				elif tag_val == None:
+					break
+			except:
+				break
+		print(request.form.get('tag1'), request.form.get('tag2'), request.form.get('tag3'), request.form.get('tag4'))
 		return render_template('photos.html', photos=getAlbumPhotos(aid[0][0]), base64=base64)
 	#The method is GET so we return a  HTML form to upload the a photo.
 	else:
