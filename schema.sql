@@ -89,3 +89,12 @@ CREATE TABLE Has
   FOREIGN KEY (comment_id) REFERENCES Comments(comment_id),
   FOREIGN KEY (picture_id) REFERENCES Pictures(picture_id)
 );
+
+CREATE TABLE Likes
+(
+  user_id int4,
+  picture_id int4,
+  CONSTRAINT like_pk PRIMARY KEY (user_id, picture_id),
+  FOREIGN KEY (user_id) REFERENCES Users(user_id),
+  FOREIGN KEY (picture_id) REFERENCES Pictures(picture_id)
+);

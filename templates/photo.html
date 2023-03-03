@@ -10,6 +10,8 @@
     <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0][0]).decode("ascii") }}'/><br>
     {{photo[0][2]}}
 
+    <p>likes</p>
+
     {% if notsame %}
     <form action="{{ url_for('add_comment', subpath='photo') }}" method="post">
         <input type="hidden" name="picture_id" value="{{photo[0][1]}}">
