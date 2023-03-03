@@ -58,7 +58,7 @@ CREATE TABLE Contains
 
 CREATE TABLE Comments
 (
-  commend_id int4 AUTO_INCREMENT NOT NULL UNIQUE,
+  comment_id int4 AUTO_INCREMENT NOT NULL UNIQUE,
   date DATE,
   text varchar(500),
   CONSTRAINT comment_pk PRIMARY KEY (commend_id)
