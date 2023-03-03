@@ -61,11 +61,20 @@ CREATE TABLE Comments
   commend_id int4 AUTO_INCREMENT NOT NULL UNIQUE,
   date DATE,
   text varchar(500),
-  CONSTRAINT (comment_pk) PRIMARY KEY (commend_id)
+  CONSTRAINT comment_pk PRIMARY KEY (commend_id)
 );
 
 CREATE TABLE Tag
 (
   word varchar(255) NOT NULL UNIQUE,
   PRIMARY KEY (word)
-)
+);
+
+CREATE TABLE Associate
+(
+  picture_id int4,
+  word varchar(255),
+  CONSTRAINT associate_pk PRIMARY KEY (picture_id, word),
+  FOREIGN KEY (picture_id) REFERENCES Pictures(picture_id),
+  FOREIGN KEY (word) REFERENCES Tag(word)
+);

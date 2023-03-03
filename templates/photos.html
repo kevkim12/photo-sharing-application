@@ -2,6 +2,9 @@
     <ul>
         {% for photo, id in photos %}
         <li>{{photo[2]}}<br>
-            <a href="/{{id}}"><img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></a></li>
+            <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></li><br>
+            <!-- {% for tag, id in tags %}
+                <a href="/{{ id }}">{{ tag }}</a>
+            {% endfor %} -->
         {% endfor %}
     </ul></t>
