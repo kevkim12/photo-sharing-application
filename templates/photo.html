@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo</title>
+</head>
+<body>
+    <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0][0]).decode("ascii") }}'/><br>
+    {{photo[0][2]}}
+
+    <form action="{{ url_for('add_comment') }}" method="post">
+        <input type="hidden" name="picture_id" value="{{photo[0][1]}}">
+        <label for="addcomment">Add new comment</label>
+        <input type="text" placeholder='comment' name="addcomment">
+        <button type="submit">Add</button>
+    </form>
+
+    <h2>Comments:</h2>
+    {% for comment in comments %}
+        <li>{{ comment }}<br>
+        </li>
+    {% endfor %}
+</body>
+</html>

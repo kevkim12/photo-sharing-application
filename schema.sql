@@ -38,6 +38,8 @@ CREATE TABLE Pictures
   CONSTRAINT pictures_pk PRIMARY KEY (picture_id)
 );
 
+
+
 CREATE TABLE Albums
 (
   album_id int4 AUTO_INCREMENT NOT NULL UNIQUE,
@@ -61,7 +63,7 @@ CREATE TABLE Comments
   comment_id int4 AUTO_INCREMENT NOT NULL UNIQUE,
   date DATE,
   text varchar(500),
-  CONSTRAINT comment_pk PRIMARY KEY (commend_id)
+  CONSTRAINT comment_pk PRIMARY KEY (comment_id)
 );
 
 CREATE TABLE Tag
@@ -77,4 +79,13 @@ CREATE TABLE Associate
   CONSTRAINT associate_pk PRIMARY KEY (picture_id, word),
   FOREIGN KEY (picture_id) REFERENCES Pictures(picture_id),
   FOREIGN KEY (word) REFERENCES Tag(word)
+);
+
+CREATE TABLE Has
+(
+  comment_id int4,
+  picture_id int4,
+  CONSTRAINT comment_pk PRIMARY KEY (comment_id, picture_id),
+  FOREIGN KEY (comment_id) REFERENCES Comments(comment_id),
+  FOREIGN KEY (picture_id) REFERENCES Pictures(picture_id)
 );

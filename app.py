@@ -14,6 +14,7 @@ import flask
 from flask import Flask, Response, request, render_template, redirect, url_for
 from flaskext.mysql import MySQL
 import flask_login
+import re
 
 #for getting current date
 from datetime import date
@@ -84,6 +85,11 @@ def getAlbumPhotos(aid):
     cursor = conn.cursor()
     cursor.execute("SELECT imgdata, picture_id, caption FROM Pictures WHERE picture_id IN (SELECT picture_id FROM Contains WHERE album_id = '{0}')".format(aid))
     return cursor.fetchall() #NOTE return a list of tuples, [(imgdata, pid, caption), ...]
+
+def getPhotoDetails(pid):
+	cursor = conn.cursor()
+	cursor.execute("SELECT imgdata, picture_id, caption FROM Pictures WHERE picture_id = '{0}'".format(pid))
+	return cursor.fetchall()
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -165,6 +171,10 @@ def getUserIdFromEmail(email):
 	cursor.execute("SELECT user_id FROM Users WHERE email = '{0}'".format(email))
 	return cursor.fetchone()[0]
 
+def getCommentId(comment):
+	cursor = conn.cursor()
+	cursor.execute("SELECT comment_id FROM Comments WHERE comment_id = '{0}'".format(comment))
+
 def isEmailUnique(email):
 	#use this to check if a email has already been registered
 	cursor = conn.cursor()
@@ -179,12 +189,41 @@ def isEmailUnique(email):
 @flask_login.login_required
 def protected():
 	return render_template('hello.html', name=flask_login.current_user.id, message="Here's your profile")
+@app.route('/albums/<path:subpath>', methods=['POST'])
+def add_comment(subpath):
+		if "photo" in subpath:
+			print("gggggggg")
+			addcomment = request.form.get('addcomment')
+			picture_id = request.form.get('picture_id')
+			cursor = conn.cursor()
+			cursor.execute("INSERT INTO Comments (text) VALUES ('{0}')".format(addcomment))
+			conn.commit()
+			cursor.execute("SELECT comment_id FROM Comments WHERE text = '{0}'".format(addcomment))
+			cid = cursor.fetchall()
+			cursor.execute("INSERT INTO Has (comment_id, picture_id) VALUES ('{0}', '{1}')".format(cid[0][0], picture_id))
+			conn.commit()
+			cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(picture_id))
+			commentsv = cursor.fetchall()
+			comments_list = [(row[0]) for row in commentsv]
+			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, base64=base64)
+		else:
+			#for albums
+			print("<><><><><>><")
+			return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
+
 
 @app.route('/albums/<path:subpath>', methods=['GET'])
 def display_photos(subpath):
+	print(subpath)
 	if "photo" in subpath:
+		ns = re.findall('\d+', subpath)
 		#for individual photos
 		print("lol")
+		print("output", ns[0])
+		cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(ns[0]))
+		commentsv = cursor.fetchall()
+		comments_list = [(row[0]) for row in commentsv]
+		return render_template('photo.html', photo=getPhotoDetails(ns[0]), comments=comments_list, base64=base64)
 	else:
 		#for albums
 		return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
