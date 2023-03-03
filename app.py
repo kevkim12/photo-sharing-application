@@ -323,6 +323,10 @@ def test():
 def javascript():
 	return render_template('script.js')
 
+@app.route("/minimal-table.css", methods=['Get'])
+def tableDesign():
+	return render_template('minimal-table.css')
+
 
 if __name__ == "__main__":
 	#this is invoked when in the shell  you run
