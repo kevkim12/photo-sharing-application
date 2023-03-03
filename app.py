@@ -302,6 +302,14 @@ def display_albums():
 def hello():
 	return render_template('hello.html', message='Welecome to Photoshare')
 
+@app.route("/utils/test.html", methods=['Get'])
+def test():
+	return render_template('test.html')
+
+@app.route("/utils/script.js", methods=['Get'])
+def javascript():
+	return render_template('script.js')
+
 
 if __name__ == "__main__":
 	#this is invoked when in the shell  you run

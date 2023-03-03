@@ -1,6 +1,7 @@
 <!-- author ben lawson (balawson@bu.edu) -->
 <head>
     <title>Upload a photo!</title>
+    <script src="/utils/script.js" defer></script>
 </head>
     <body>
         <div class="title">
@@ -9,7 +10,7 @@
             <form method="post" enctype="multipart/form-data" action="/upload">
                 <label for="photo">Select photo:</label>
                 <input type="file" name="photo" required='true' /><br />
-                <label for="caption">Please caption:</label>
+                <label for="caption">Please type a caption:</label>
                 <input type="text" name="caption" required='true' /><br />
                 <select name="album" required="true">
                     <option value="">Select an album</option>
@@ -17,6 +18,10 @@
                     <option value="{{album}}">{{album}}</option>
                     {% endfor %}
                 </select>
+                <div id="tag-input">
+                    <label for="tag">Tags:</label>
+                </div>
+                <button type="button" onclick="addTagInput()">Add Tag</button><br>
                 <input type="submit" value="Upload" />
             </form>
     </body>

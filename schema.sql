@@ -63,3 +63,9 @@ CREATE TABLE Comments
   text varchar(500),
   CONSTRAINT (comment_pk) PRIMARY KEY (commend_id)
 );
+
+CREATE TABLE Tag
+(
+  word varchar(255) NOT NULL UNIQUE,
+  PRIMARY KEY (word)
+)
