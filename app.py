@@ -193,8 +193,11 @@ def protected():
 def add_comment(subpath):
 		if "photo" in subpath:
 			print("gggggggg")
-			addcomment = request.form.get('addcomment')
 			picture_id = request.form.get('picture_id')
+			# cursor.execute("SELECT user_id FROM Pictures WHERE picture_id = '{0}')".format(picture_id))
+			# userv = cursor.fetchall()
+			# print(userv)
+			addcomment = request.form.get('addcomment')
 			cursor = conn.cursor()
 			cursor.execute("INSERT INTO Comments (text) VALUES ('{0}')".format(addcomment))
 			conn.commit()
@@ -205,7 +208,7 @@ def add_comment(subpath):
 			cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(picture_id))
 			commentsv = cursor.fetchall()
 			comments_list = [(row[0]) for row in commentsv]
-			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, base64=base64)
+			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=True, base64=base64)
 		else:
 			#for albums
 			print("<><><><><>><")
@@ -217,13 +220,16 @@ def display_photos(subpath):
 	print(subpath)
 	if "photo" in subpath:
 		ns = re.findall('\d+', subpath)
+		nosame = True
 		#for individual photos
-		print("lol")
-		print("output", ns[0])
+		cursor.execute("SELECT user_id FROM Pictures WHERE picture_id = '{0}'".format(ns[0]))
+		userv = cursor.fetchall()
+		if userv[0][0] == getUserIdFromEmail(flask_login.current_user.id):
+				nosame = False
 		cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(ns[0]))
 		commentsv = cursor.fetchall()
 		comments_list = [(row[0]) for row in commentsv]
-		return render_template('photo.html', photo=getPhotoDetails(ns[0]), comments=comments_list, base64=base64)
+		return render_template('photo.html', photo=getPhotoDetails(ns[0]), comments=comments_list, notsame=nosame, base64=base64)
 	else:
 		#for albums
 		return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)

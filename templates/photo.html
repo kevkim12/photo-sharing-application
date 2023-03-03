@@ -10,12 +10,14 @@
     <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0][0]).decode("ascii") }}'/><br>
     {{photo[0][2]}}
 
+    {% if notsame %}
     <form action="{{ url_for('add_comment', subpath='photo') }}" method="post">
         <input type="hidden" name="picture_id" value="{{photo[0][1]}}">
         <label for="addcomment">Add new comment</label>
         <input type="text" placeholder='comment' name="addcomment">
         <button type="submit">Add</button>
     </form>
+    {% endif %}
 
     <h2>Comments:</h2>
     {% for comment in comments %}
