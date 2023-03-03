@@ -1,6 +1,5 @@
 ######################################
 # author ben lawson <balawson@bu.edu>
-# Edited by: Craig Einstein <einstein@bu.edu>
 # Edited by: Craig Einstein <einstein@bu.edu>, Kevin Kim <kevkim@bu.edu>, Jiahao Huamani <jhuamani@bu.edu>
 # Group project by: Kevin Kim <kevkim@bu.edu>, Jiahao Huamani <jhuamani@bu.edu>
 ######################################
@@ -126,7 +125,7 @@ def unauthorized_handler():
 #you can specify specific methods (GET/POST) in function header instead of inside the functions as seen earlier
 @app.route("/register", methods=['GET'])
 def register():
-	return render_template('register.html', supress='True')
+	return render_template('register.html', suppress=False)
 
 @app.route("/register", methods=['POST'])
 def register_user():
@@ -153,7 +152,8 @@ def register_user():
 		return render_template('hello.html', name=email, message='Account Created!')
 	else:
 		print("couldn't find all tokens")
-		return flask.redirect(flask.url_for('register'))
+		print('oof')
+		return flask.redirect(flask.url_for('register', suppress=True))
 
 def getUsersPhotos(uid):
 	cursor = conn.cursor()
@@ -185,6 +185,7 @@ def display_photos(subpath):
     return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
 
 @app.route('/userAlbums', methods=['GET'])
+@flask_login.login_required
 def userAlbums():
 	cursor = conn.cursor()
 	cursor.execute("SELECT album_id, albumname FROM Albums WHERE user_id = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
@@ -193,6 +194,7 @@ def userAlbums():
 	return render_template('userAlbums.html', albums=albums_list)
 
 @app.route('/userAlbums', methods=['POST'])
+@flask_login.login_required
 def add_album():
 	albumname=request.form.get('albumname')
 	cursor = conn.cursor()
@@ -205,6 +207,7 @@ def add_album():
 	return render_template('userAlbums.html', albums=albums_list)
 
 @app.route("/friends", methods=['GET'])
+@flask_login.login_required
 def friends():
 	cursor.execute("SELECT user_id2 FROM Friends WHERE user_id1 = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
 	friendsv = cursor.fetchall()
