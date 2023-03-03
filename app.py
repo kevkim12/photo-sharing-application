@@ -23,7 +23,7 @@ from datetime import date
 import os, base64
 
 mysql = MySQL()
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 app.secret_key = 'cs460projectkevinkimjiahaohuamani'  # Change this!
 
 #These will need to be changed according to your creditionals
