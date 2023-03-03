@@ -182,7 +182,12 @@ def protected():
 
 @app.route('/albums/<path:subpath>', methods=['GET'])
 def display_photos(subpath):
-    return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
+	if "photo" in subpath:
+		#for individual photos
+		print("lol")
+	else:
+		#for albums
+		return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
 
 @app.route('/userAlbums', methods=['GET'])
 @flask_login.login_required

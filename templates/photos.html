@@ -1,10 +1,11 @@
-<t><h2>Photos</h2>
+<t>
+    <h2>Photos</h2>
     <ul>
         {% for photo in photos %}
-        <li>{{photo[2]}}<br>
-            <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></li><br>
-            <!-- {% for tag, id in tags %}
-                <a href="/{{ id }}">{{ tag }}</a>
-            {% endfor %} -->
+        <li>
+            <a href="photo/{{ photo[1] }}"><img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></a><br>
+            {{photo[2]}}
+        </li><br>
         {% endfor %}
-    </ul></t>
+    </ul>
+</t>
