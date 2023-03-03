@@ -298,7 +298,6 @@ def upload_file():
 					break
 			except:
 				break
-		print(request.form.get('tag1'), request.form.get('tag2'), request.form.get('tag3'), request.form.get('tag4'))
 		return render_template('photos.html', photos=getAlbumPhotos(aid[0][0]), base64=base64)
 	#The method is GET so we return a  HTML form to upload the a photo.
 	else:
