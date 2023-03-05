@@ -327,6 +327,36 @@ def add_album():
 	albums_list = [(row[1], row[0]) for row in albumsv]
 	return render_template('userAlbums.html', albums=albums_list)
 
+@app.route('/modifyAlbums', methods=['GET'])
+@flask_login.login_required
+def modifyAlbums():
+	cursor = conn.cursor()
+	cursor.execute("SELECT album_id, albumname FROM Albums WHERE user_id = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
+	albumsv = cursor.fetchall()
+	albums_list = [(row[1], row[0]) for row in albumsv]
+	return render_template('modifyAlbums.html', albums=albums_list)
+
+@app.route('/modifyAlbums', methods=['POST'])
+@flask_login.login_required
+def delete_album():
+	cursor = conn.cursor()
+	selected_album = request.form.get('delete_album')
+	cursor.execute("SELECT picture_id FROM Contains WHERE album_id = '{0}'".format(selected_album))
+	picture_ids = cursor.fetchall()
+	for picture_id in picture_ids:
+		cursor.execute("DELETE FROM Likes WHERE picture_id = '{0}'".format(picture_id[0]))
+		cursor.execute("DELETE FROM Associate WHERE picture_id = '{0}'".format(picture_id[0]))
+		cursor.execute("DELETE FROM Contains WHERE picture_id = '{0}'".format(picture_id[0]))
+		cursor.execute("DELETE FROM Pictures WHERE picture_id = '{0}'".format(picture_id[0]))
+	cursor.execute("DELETE FROM Contains WHERE album_id = '{0}'".format(selected_album))
+	cursor.execute("DELETE FROM Albums WHERE album_id = '{0}'".format(selected_album))
+	conn.commit()
+	cursor.execute("SELECT album_id, albumname FROM Albums WHERE user_id = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
+	albumsv = cursor.fetchall()
+	albums_list = [(row[1], row[0]) for row in albumsv]
+	return render_template('modifyAlbums.html', albums=albums_list)
+	
+
 @app.route("/friends", methods=['GET'])
 @flask_login.login_required
 def friends():

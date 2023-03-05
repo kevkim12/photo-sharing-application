@@ -13,7 +13,10 @@
         <input type="text" name="albumname"/><br />
         <button type="submit">Add</button>
       </form>
+      
 
+      <a href="{{ url_for('modifyAlbums') }}">Modify Albums</a>
+      
       <h2>Here are your Albums</h2>
     <ul>
         {% for album,id in albums %}
