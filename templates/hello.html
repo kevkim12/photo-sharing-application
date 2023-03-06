@@ -23,11 +23,6 @@
   <p>You should <a href='/login'>login!</a></p>
 {% else %}
   <p> Go to <a href='/profile'>profile?</a></p>
-  <!-- <form action="{{ url_for('add_album') }}" method="post">
-    <label for="addAlbum">Make an album:</label>
-    <input type="text" name="addAlbum"/><br />
-    <input type="submit" />
-  </form> -->
   <a href="/userAlbums">Your Albums</a>
   <a href='/friends'>Friends</a>
 {% endif %}
@@ -40,3 +35,4 @@
 
 <a href='/albums'>Browse Albums</a>
 <a href='/leaderboard'>Leaderboard</a>
+<a href="/comments">Search Comments</a>

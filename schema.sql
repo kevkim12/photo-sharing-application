@@ -98,3 +98,12 @@ CREATE TABLE Likes
   FOREIGN KEY (user_id) REFERENCES Users(user_id),
   FOREIGN KEY (picture_id) REFERENCES Pictures(picture_id)
 );
+
+CREATE TABLE Made
+(
+  user_id int4,
+  comment_id int4,
+  CONSTRAINT made_pk PRIMARY KEY (user_id, comment_id),
+  FOREIGN KEY (user_id) REFERENCES Users(user_id),
+  FOREIGN KEY (comment_id) REFERENCES Comments(comment_id)
+)

@@ -211,7 +211,10 @@ def add_comment(subpath):
 			conn.commit()
 			cursor.execute("SELECT comment_id FROM Comments WHERE text = '{0}'".format(addcomment))
 			cid = cursor.fetchall()
-			cursor.execute("INSERT INTO Has (comment_id, picture_id) VALUES ('{0}', '{1}')".format(cid[0][0], picture_id))
+			cidNew = max(cid)[0]
+			cursor.execute("INSERT INTO Has (comment_id, picture_id) VALUES ('{0}', '{1}')".format(cidNew, picture_id))
+			conn.commit()
+			cursor.execute("INSERT INTO Made (user_id, comment_id) VALUES ('{0}', '{1}')".format(getUserIdFromEmail(flask_login.current_user.id), cidNew))
 			conn.commit()
 			cursor.execute("UPDATE Users Set score = score + 1 WHERE user_id = '{0}'".format(uid))
 			conn.commit()
@@ -505,6 +508,23 @@ def display_leaderboard():
 	tagleaderboard_list = [(row[0], row[1]) for row in tagleaderboardv]
 	return render_template('leaderboard.html', leaderboard=leaderboard_list, tagleaderboard=tagleaderboard_list)
 
+@app.route("/comments", methods=['Get'])
+def display_commentSearch():
+	return render_template('comments.html')
+
+@app.route("/comments", methods=['POST'])
+def search_comment():
+	comment = request.form.get('commentSearch')
+	cursor = conn.cursor()
+	# cursor.execute("SELECT email FROM Users WHERE user_id IN (SELECT user_id FROM Made WHERE comment_id IN (SELECT comment_id FROM Comments WHERE text = '{0}'))".format(comment))
+	cursor.execute("SELECT Users.email, COUNT(*) FROM Users INNER JOIN Made ON Users.user_id = Made.user_id INNER JOIN Comments ON Made.comment_id = Comments.comment_id WHERE Comments.text = '{0}' GROUP BY Users.email".format(comment))
+	commentv = cursor.fetchall()
+	print(commentv)
+	sorted_data = sorted(commentv, key=lambda x: x[1], reverse=True)
+	sorted_emails = [x[0] for x in sorted_data]
+	print(sorted_emails)
+	return render_template('comments.html', comments = sorted_emails, text=comment)
+
 
 #default page
 @app.route("/", methods=['GET'])
@@ -522,6 +542,8 @@ def javascript():
 @app.route("/minimal-table.css", methods=['Get'])
 def tableDesign():
 	return render_template('minimal-table.css')
+
+
 
 
 if __name__ == "__main__":
