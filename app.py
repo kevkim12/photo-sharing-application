@@ -628,6 +628,23 @@ def search_comment():
 	print(sorted_emails)
 	return render_template('comments.html', comments = sorted_emails, text=comment)
 
+@app.route("/photoRecs", methods=['Get'])
+def display_photoRecs():
+	cursor = conn.cursor()
+	tag_query = "SELECT word, COUNT(*) AS tag_count FROM Associate JOIN Pictures ON Associate.picture_id = Pictures.picture_id WHERE Pictures.user_id = '{user_id}' GROUP BY word ORDER BY tag_count DESC LIMIT 3"
+	cursor.execute(tag_query.format(user_id = getUserIdFromEmail(flask_login.current_user.id)))
+	tags = cursor.fetchall()
+	print("tags: ", tags)
+	if tags == ():
+		return render_template('photoRecs.html', photos=[])
+	else:
+		photos_query = "SELECT p.picture_id, p.imgdata, p.caption, COUNT(*) AS match_count, COUNT(DISTINCT a.word) AS tag_count FROM Associate a JOIN Pictures p ON a.picture_id = p.picture_id WHERE a.word IN ({tags}) AND p.user_id != {user_id} AND a.picture_id NOT IN (SELECT picture_id FROM Associate WHERE word NOT IN ({tags})) GROUP BY a.picture_id ORDER BY match_count DESC, tag_count ASC"
+		tag_names = [f"'{tag[0]}'" for tag in tags]
+		photos_query = photos_query.format(tags=','.join(tag_names), user_id=getUserIdFromEmail(flask_login.current_user.id))
+		cursor.execute(photos_query)
+		photos = cursor.fetchall()
+		print("p", photos)
+	return render_template('photoRecs.html', photos=photos, base64=base64)
 
 #default page
 @app.route("/", methods=['GET'])

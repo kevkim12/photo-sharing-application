@@ -20,7 +20,7 @@
       <h2>Here are your Albums</h2>
     <ul>
         {% for album,id in albums %}
-        <li><a href="/{{ id }}">{{ album }}</a></li>
+        <li><a href="albums/{{ id }}">{{ album }}</a></li>
         {% endfor %}
     </ul>
 </body>
