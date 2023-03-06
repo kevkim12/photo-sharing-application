@@ -374,7 +374,26 @@ def delete_album():
 	albumsv = cursor.fetchall()
 	albums_list = [(row[1], row[0]) for row in albumsv]
 	return render_template('modifyAlbums.html', albums=albums_list)
-	
+
+@app.route('/modifyPhoto/<path:subpath>', methods=['GET'])
+@flask_login.login_required
+def modifyPictures(subpath):
+	return render_template('modifyPictures.html', photos=getAlbumPhotos(subpath), base64=base64, album_id=subpath)
+
+@app.route('/modifyPhoto/<path:subpath>', methods=['POST'])
+@flask_login.login_required
+def delete_photo(subpath):
+	pid = request.form.get('picture_id')
+	cursor = conn.cursor()
+	cursor.execute("DELETE FROM Has WHERE picture_id = '{0}'".format(pid))
+	cursor.execute("DELETE FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(pid))
+	cursor.execute("DELETE FROM Likes WHERE picture_id = '{0}'".format(pid))
+	cursor.execute("DELETE FROM Associate WHERE picture_id = '{0}'".format(pid))
+	cursor.execute("DELETE FROM Contains WHERE picture_id = '{0}'".format(pid))
+	cursor.execute("DELETE FROM Pictures WHERE picture_id = '{0}'".format(pid))
+	conn.commit()
+	return render_template('modifyPictures.html', photos=getAlbumPhotos(subpath), base64=base64, album_id=subpath)
+
 
 @app.route("/friends", methods=['GET'])
 @flask_login.login_required

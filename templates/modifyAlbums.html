@@ -13,7 +13,7 @@
     <ul>
         {% for album, id in albums %}
         <li>
-            <a href="/{{ id }}">{{ album }}</a> 
+            <a href="modifyPhoto/{{ id }}">{{ album }}</a> 
             <span style="cursor: pointer;">
                 <form method="post">
                     <button type="submit" name="delete_album" value="{{ id }}">🗑️</button>
