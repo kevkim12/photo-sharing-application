@@ -1,0 +1,20 @@
+{% include "navbar.html" %}
+
+<h1>You may also like...</h1>
+
+{% if photos %}
+  {% for i in range(3) %}
+    {% for photo in photos if photo[3] == 3-i %}
+      <div class="row">
+        <div class="col-md-4">
+            <a href="albums/photo/{{ photo[0] }}"><img src='data:image/jpg;base64, {{ base64.b64encode(photo[1]).decode("ascii") }}'/></a><br>
+          <p>{{ photo[2] }}</p>
+          <p>{{ photo[4] }} tag matches</p>
+          
+        </div>
+      </div>
+    {% endfor %}
+  {% endfor %}
+{% else %}
+  <p>There are no photos to recommend.</p>
+{% endif %}
