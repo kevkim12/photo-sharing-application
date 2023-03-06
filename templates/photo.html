@@ -11,6 +11,8 @@
     <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0][0]).decode("ascii") }}'/><br>
     {{photo[0][2]}}
 
+    <h2><a href="{{photo[0][1]}}/likes">Likes - {{totalLikes}}</a></h2>
+
     {% if liked %}
     <form action="{{ url_for('add_unlike', subpath='photo') }}" method="post">
         <input type="hidden" name="picture_id" value="{{photo[0][1]}}">

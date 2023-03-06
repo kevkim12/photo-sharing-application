@@ -225,7 +225,10 @@ def add_comment(subpath):
 				liked = False
 			else:
 				liked = True
-			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=True, liked=liked, base64=base64)
+
+			cursor.execute("SELECT SUM(1) FROM Likes WHERE picture_id = '{0}'".format(picture_id))
+			totalLikes = cursor.fetchall()[0][0]
+			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=True, liked=liked, totalLikes=totalLikes, base64=base64)
 		else:
 			#for albums
 			print("<><><><><>><")
@@ -249,13 +252,16 @@ def add_like(subpath):
 				nosame = False
 			else:
 				nosame = True
-			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=nosame, liked=liked, base64=base64)
+
+			cursor.execute("SELECT SUM(1) FROM Likes WHERE picture_id = '{0}'".format(picture_id))
+			totalLikes = cursor.fetchall()[0][0]
+			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=nosame, liked=liked, totalLikes=totalLikes, base64=base64)
 		else:
 			#for albums
 			print("<><><><><>><")
 			return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
 		
-@app.route('/albums/<path:subpath>?add_unlike', methods=['POST'])
+@app.route('/albums/<path:subpath>/add_unlike', methods=['POST'])
 def add_unlike(subpath):
 		if "photo" in subpath:
 			picture_id = request.form.get('picture_id')
@@ -273,7 +279,10 @@ def add_unlike(subpath):
 				nosame = False
 			else:
 				nosame = True
-			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=nosame, liked=liked, base64=base64)
+
+			cursor.execute("SELECT SUM(1) FROM Likes WHERE picture_id = '{0}'".format(picture_id))
+			totalLikes = cursor.fetchall()[0][0]
+			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=nosame, liked=liked, totalLikes=totalLikes, base64=base64)
 		else:
 			#for albums
 			print("<><><><><>><")
@@ -283,7 +292,14 @@ def add_unlike(subpath):
 @app.route('/albums/<path:subpath>', methods=['GET'])
 def display_photos(subpath):
 	print(subpath)
-	if "photo" in subpath:
+	if "likes" in subpath:
+		ns = re.findall('\d+', subpath)
+		cursor.execute("SELECT email FROM Users WHERE user_id IN (SELECT user_id FROM Likes WHERE picture_id = '{0}')".format(ns[0]))
+		likesv = cursor.fetchall()
+		likes_list = [(row[0]) for row in likesv]
+		print(likes_list)
+		return render_template('likes.html', likesby = likes_list)
+	elif "photo" in subpath:
 		ns = re.findall('\d+', subpath)
 		nosame = True
 		#for individual photos
@@ -300,7 +316,10 @@ def display_photos(subpath):
 			liked = False
 		else:
 			liked = True
-		return render_template('photo.html', photo=getPhotoDetails(ns[0]), comments=comments_list, notsame=nosame,liked=liked, base64=base64)
+
+		cursor.execute("SELECT SUM(1) FROM Likes WHERE picture_id = '{0}'".format(ns[0]))
+		totalLikes = cursor.fetchall()[0][0]
+		return render_template('photo.html', photo=getPhotoDetails(ns[0]), comments=comments_list, notsame=nosame,liked=liked, totalLikes=totalLikes, base64=base64)
 	else:
 		#for albums
 		return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
