@@ -599,8 +599,8 @@ def search_comment():
 @app.route("/photoRecs", methods=['Get'])
 def display_photoRecs():
 	cursor = conn.cursor()
-	tag_query = "SELECT word, COUNT(*) AS tag_count FROM Associate JOIN Pictures ON Associate.picture_id = Pictures.picture_id JOIN Users ON Pictures.user_id = Users.user_id WHERE Users.email != '{email}' GROUP BY word ORDER BY tag_count DESC LIMIT 3"
-	cursor.execute(tag_query.format(email=flask_login.current_user.id))
+	tag_query = "SELECT word, COUNT(*) AS tag_count FROM Associate JOIN Pictures ON Associate.picture_id = Pictures.picture_id WHERE Pictures.user_id = '{user_id}' GROUP BY word ORDER BY tag_count DESC LIMIT 3"
+	cursor.execute(tag_query.format(user_id = getUserIdFromEmail(flask_login.current_user.id)))
 	tags = cursor.fetchall()
 	print("tags: ", tags)
 	if tags == ():
