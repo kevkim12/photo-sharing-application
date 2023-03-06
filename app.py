@@ -446,6 +446,7 @@ def add_friend():
 				friends_list.append(result[0][0])
 		return render_template('friends.html', friends=friends_list)
 	
+recommendations_list = {}
 @app.route('/friendRecs', methods=['GET'])
 @flask_login.login_required
 def display_recs():
@@ -482,9 +483,15 @@ def display_recs():
 @app.route('/friendRecs', methods=['POST'])
 @flask_login.login_required
 def friendRecs():
-	#code here
-
-	return render_template('friendRecs.html')
+	selected_friend = request.form.get('friend_email')
+	cursor = conn.cursor()
+	cursor.execute("INSERT INTO Friends (user_id1, user_id2) VALUES ('{0}', '{1}')".format(getUserIdFromEmail(flask_login.current_user.id), getUserIdFromEmail(selected_friend))) 
+	conn.commit()
+	for i in range(len(recommendations_list)):
+		if recommendations_list[i] == getUserIdFromEmail(selected_friend):
+			recommendations_list.pop(i)
+			break
+	return render_template('friendRecs.html', users = recommendations_list)
 
 #begin photo uploading code
 # photos uploaded using base64 encoding so they can be directly embeded in HTML
