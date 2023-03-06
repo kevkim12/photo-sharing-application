@@ -181,6 +181,11 @@ def getUserIdFromEmail(email):
 	cursor.execute("SELECT user_id FROM Users WHERE email = '{0}'".format(email))
 	return cursor.fetchone()[0]
 
+def getEmailFromUserID(user_id):
+    cursor = conn.cursor()
+    cursor.execute("SELECT email FROM Users WHERE user_id = '{0}'".format(user_id))
+    return cursor.fetchone()[0]
+
 def getCommentId(comment):
 	cursor = conn.cursor()
 	cursor.execute("SELECT comment_id FROM Comments WHERE comment_id = '{0}'".format(comment))
@@ -377,7 +382,26 @@ def delete_album():
 	albumsv = cursor.fetchall()
 	albums_list = [(row[1], row[0]) for row in albumsv]
 	return render_template('modifyAlbums.html', albums=albums_list)
-	
+
+@app.route('/modifyPhoto/<path:subpath>', methods=['GET'])
+@flask_login.login_required
+def modifyPictures(subpath):
+	return render_template('modifyPictures.html', photos=getAlbumPhotos(subpath), base64=base64, album_id=subpath)
+
+@app.route('/modifyPhoto/<path:subpath>', methods=['POST'])
+@flask_login.login_required
+def delete_photo(subpath):
+	pid = request.form.get('picture_id')
+	cursor = conn.cursor()
+	cursor.execute("DELETE FROM Has WHERE picture_id = '{0}'".format(pid))
+	cursor.execute("DELETE FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(pid))
+	cursor.execute("DELETE FROM Likes WHERE picture_id = '{0}'".format(pid))
+	cursor.execute("DELETE FROM Associate WHERE picture_id = '{0}'".format(pid))
+	cursor.execute("DELETE FROM Contains WHERE picture_id = '{0}'".format(pid))
+	cursor.execute("DELETE FROM Pictures WHERE picture_id = '{0}'".format(pid))
+	conn.commit()
+	return render_template('modifyPictures.html', photos=getAlbumPhotos(subpath), base64=base64, album_id=subpath)
+
 
 @app.route("/friends", methods=['GET'])
 @flask_login.login_required
@@ -424,6 +448,53 @@ def add_friend():
 			if result:
 				friends_list.append(result[0][0])
 		return render_template('friends.html', friends=friends_list)
+	
+recommendations_list = {}
+@app.route('/friendRecs', methods=['GET'])
+@flask_login.login_required
+def display_recs():
+	user_id = getUserIdFromEmail(flask_login.current_user.id)
+	cursor.execute("SELECT user_id2 FROM Friends WHERE user_id1 = '{0}'".format(user_id))
+	friendsv = cursor.fetchall()
+	friends_list = []
+	for i in range(len(friendsv)):
+		cursor.execute("SELECT email FROM Users WHERE user_id = '{0}'".format(friendsv[i][0]))
+		result = cursor.fetchall()
+		if result:
+			friends_list.append(result[0][0])
+	recommendations = {}
+	for friend in friends_list:
+		cursor.execute("SELECT user_id2 FROM Friends WHERE user_id1 = '{0}'".format(getUserIdFromEmail(friend)))
+		friend_friends = cursor.fetchall()
+		for friend_friend in friend_friends:
+			friend_email = getEmailFromUserID(friend_friend[0])
+			if friend_email != user_id and friend_email not in friends_list:
+				if friend_email not in recommendations:
+					recommendations[friend_email] = 1
+				else:
+					recommendations[friend_email] += 1
+	sorted_recommendations = sorted(recommendations.items(), key=lambda x: x[1], reverse=True)
+	recommendations_list = [x[0] for x in sorted_recommendations]
+	for i in range(len(recommendations_list)):
+		if recommendations_list[i] == getEmailFromUserID(user_id):
+			recommendations_list.pop(i)
+			break
+	print("DONE")
+	print(recommendations_list)
+	return render_template('friendRecs.html', users=recommendations_list)
+
+@app.route('/friendRecs', methods=['POST'])
+@flask_login.login_required
+def friendRecs():
+	selected_friend = request.form.get('friend_email')
+	cursor = conn.cursor()
+	cursor.execute("INSERT INTO Friends (user_id1, user_id2) VALUES ('{0}', '{1}')".format(getUserIdFromEmail(flask_login.current_user.id), getUserIdFromEmail(selected_friend))) 
+	conn.commit()
+	for i in range(len(recommendations_list)):
+		if recommendations_list[i] == getUserIdFromEmail(selected_friend):
+			recommendations_list.pop(i)
+			break
+	return render_template('friendRecs.html', users = recommendations_list)
 
 #begin photo uploading code
 # photos uploaded using base64 encoding so they can be directly embeded in HTML

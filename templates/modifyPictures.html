@@ -1,0 +1,14 @@
+{% include "navbar.html" %}
+<h2>Photos</h2>
+<ul>
+    {% for photo in photos %}
+    <li>
+        <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}'/></a><br>
+        {{photo[2]}}
+        <form action="{{ url_for('delete_photo', subpath=album_id) }}" method="post">
+            <input type="hidden" name="picture_id" value="{{photo[1]}}">
+            <button type="submit" name="delete_button">&#128465;</button>
+        </form>
+    </li><br>
+    {% endfor %}
+</ul>
