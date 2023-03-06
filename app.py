@@ -181,6 +181,11 @@ def getUserIdFromEmail(email):
 	cursor.execute("SELECT user_id FROM Users WHERE email = '{0}'".format(email))
 	return cursor.fetchone()[0]
 
+def getEmailFromUserID(user_id):
+    cursor = conn.cursor()
+    cursor.execute("SELECT email FROM Users WHERE user_id = '{0}'".format(user_id))
+    return cursor.fetchone()[0]
+
 def getCommentId(comment):
 	cursor = conn.cursor()
 	cursor.execute("SELECT comment_id FROM Comments WHERE comment_id = '{0}'".format(comment))
@@ -440,6 +445,46 @@ def add_friend():
 			if result:
 				friends_list.append(result[0][0])
 		return render_template('friends.html', friends=friends_list)
+	
+@app.route('/friendRecs', methods=['GET'])
+@flask_login.login_required
+def display_recs():
+	user_id = getUserIdFromEmail(flask_login.current_user.id)
+	cursor.execute("SELECT user_id2 FROM Friends WHERE user_id1 = '{0}'".format(user_id))
+	friendsv = cursor.fetchall()
+	friends_list = []
+	for i in range(len(friendsv)):
+		cursor.execute("SELECT email FROM Users WHERE user_id = '{0}'".format(friendsv[i][0]))
+		result = cursor.fetchall()
+		if result:
+			friends_list.append(result[0][0])
+	recommendations = {}
+	for friend in friends_list:
+		cursor.execute("SELECT user_id2 FROM Friends WHERE user_id1 = '{0}'".format(getUserIdFromEmail(friend)))
+		friend_friends = cursor.fetchall()
+		for friend_friend in friend_friends:
+			friend_email = getEmailFromUserID(friend_friend[0])
+			if friend_email != user_id and friend_email not in friends_list:
+				if friend_email not in recommendations:
+					recommendations[friend_email] = 1
+				else:
+					recommendations[friend_email] += 1
+	sorted_recommendations = sorted(recommendations.items(), key=lambda x: x[1], reverse=True)
+	recommendations_list = [x[0] for x in sorted_recommendations]
+	for i in range(len(recommendations_list)):
+		if recommendations_list[i] == getEmailFromUserID(user_id):
+			recommendations_list.pop(i)
+			break
+	print("DONE")
+	print(recommendations_list)
+	return render_template('friendRecs.html', users=recommendations_list)
+
+@app.route('/friendRecs', methods=['POST'])
+@flask_login.login_required
+def friendRecs():
+	#code here
+
+	return render_template('friendRecs.html')
 
 #begin photo uploading code
 # photos uploaded using base64 encoding so they can be directly embeded in HTML
