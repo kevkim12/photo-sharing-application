@@ -87,6 +87,11 @@ def new_page_function():
 	return new_page_html
 '''
 
+def getTagPhotos(word):
+	cursor = conn.cursor()
+	cursor.execute("SELECT imgdata, picture_id, caption FROM Pictures WHERE picture_id IN (SELECT picture_id FROM Associate WHERE word = '{0}')".format(word))
+	return cursor.fetchall()
+
 def getAlbumPhotos(aid):
     cursor = conn.cursor()
     cursor.execute("SELECT imgdata, picture_id, caption FROM Pictures WHERE picture_id IN (SELECT picture_id FROM Contains WHERE album_id = '{0}')".format(aid))
@@ -236,7 +241,11 @@ def add_comment(subpath):
 
 			cursor.execute("SELECT SUM(1) FROM Likes WHERE picture_id = '{0}'".format(picture_id))
 			totalLikes = cursor.fetchall()[0][0]
-			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=True, liked=liked, totalLikes=totalLikes, base64=base64)
+
+			cursor.execute("SELECT word FROM Associate WHERE picture_id = '{0}'".format(picture_id))
+			tags = cursor.fetchall()
+			tags_list = [(row[0]) for row in tags]
+			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=True, liked=liked, totalLikes=totalLikes, tags=tags_list, base64=base64)
 		else:
 			#for albums
 			print("<><><><><>><")
@@ -263,7 +272,11 @@ def add_like(subpath):
 
 			cursor.execute("SELECT SUM(1) FROM Likes WHERE picture_id = '{0}'".format(picture_id))
 			totalLikes = cursor.fetchall()[0][0]
-			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=nosame, liked=liked, totalLikes=totalLikes, base64=base64)
+
+			cursor.execute("SELECT word FROM Associate WHERE picture_id = '{0}'".format(picture_id))
+			tags = cursor.fetchall()
+			tags_list = [(row[0]) for row in tags]
+			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=nosame, liked=liked, totalLikes=totalLikes, tags=tags_list, base64=base64)
 		else:
 			#for albums
 			print("<><><><><>><")
@@ -290,7 +303,11 @@ def add_unlike(subpath):
 
 			cursor.execute("SELECT SUM(1) FROM Likes WHERE picture_id = '{0}'".format(picture_id))
 			totalLikes = cursor.fetchall()[0][0]
-			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=nosame, liked=liked, totalLikes=totalLikes, base64=base64)
+
+			cursor.execute("SELECT word FROM Associate WHERE picture_id = '{0}'".format(picture_id))
+			tags = cursor.fetchall()
+			tags_list = [(row[0]) for row in tags]
+			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=nosame, liked=liked, totalLikes=totalLikes, tags=tags_list, base64=base64)
 		else:
 			#for albums
 			print("<><><><><>><")
@@ -327,7 +344,13 @@ def display_photos(subpath):
 
 		cursor.execute("SELECT SUM(1) FROM Likes WHERE picture_id = '{0}'".format(ns[0]))
 		totalLikes = cursor.fetchall()[0][0]
-		return render_template('photo.html', photo=getPhotoDetails(ns[0]), comments=comments_list, notsame=nosame,liked=liked, totalLikes=totalLikes, base64=base64)
+
+		cursor.execute("SELECT word FROM Associate WHERE picture_id = '{0}'".format(ns[0]))
+		tags = cursor.fetchall()
+		tags_list = [(row[0]) for row in tags]
+
+
+		return render_template('photo.html', photo=getPhotoDetails(ns[0]), comments=comments_list, notsame=nosame,liked=liked, totalLikes=totalLikes, tags=tags_list, base64=base64)
 	else:
 		#for albums
 		return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
@@ -567,6 +590,15 @@ def display_albums():
 	albumsv = cursor.fetchall()
 	albums_list = [(row[1], "albums/" + str(row[0])) for row in albumsv]
 	return render_template('albums.html', albums=albums_list)
+
+@app.route('/tags', methods=['GET'])
+def display_tags():
+	return render_template('tags.html')
+
+@app.route('/tags/<path:subpath>', methods=['GET'])
+def display_tag_photos(subpath):
+	return render_template('photos.html', photos=getTagPhotos(subpath), base64=base64)
+
 
 @app.route('/leaderboard', methods=['GET'])
 def display_leaderboard():
