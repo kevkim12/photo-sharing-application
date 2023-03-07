@@ -92,6 +92,11 @@ def getTagPhotos(word):
 	cursor.execute("SELECT imgdata, picture_id, caption FROM Pictures WHERE picture_id IN (SELECT picture_id FROM Associate WHERE word = '{0}')".format(word))
 	return cursor.fetchall()
 
+def getUserTagPhotos(word):
+	cursor = conn.cursor()
+	cursor.execute("SELECT imgdata, picture_id, caption FROM Pictures WHERE picture_id IN (SELECT picture_id FROM Associate WHERE word = '{0}') AND user_id = '{1}'".format(word, getUserIdFromEmail(flask_login.current_user.id)))
+	return cursor.fetchall()
+
 def getAlbumPhotos(aid):
     cursor = conn.cursor()
     cursor.execute("SELECT imgdata, picture_id, caption FROM Pictures WHERE picture_id IN (SELECT picture_id FROM Contains WHERE album_id = '{0}')".format(aid))
@@ -591,13 +596,18 @@ def display_albums():
 	albums_list = [(row[1], "albums/" + str(row[0])) for row in albumsv]
 	return render_template('albums.html', albums=albums_list)
 
-@app.route('/tags', methods=['GET'])
-def display_tags():
-	return render_template('tags.html')
+@app.route('/photosearch', methods=['GET'])
+def display_photosearch():
+	return render_template('photosearch.html')
 
 @app.route('/tags/<path:subpath>', methods=['GET'])
 def display_tag_photos(subpath):
-	return render_template('photos.html', photos=getTagPhotos(subpath), base64=base64)
+	if "yours" in subpath:
+		tag = subpath.split("/")[0]
+		return render_template('tagsyours.html', photos=getUserTagPhotos(tag), tag=tag, base64=base64)
+	else:
+		return render_template('tags.html', photos=getTagPhotos(subpath),tag=subpath, base64=base64)
+	
 
 
 @app.route('/leaderboard', methods=['GET'])
@@ -662,6 +672,7 @@ def javascript():
 @app.route("/minimal-table.css", methods=['Get'])
 def tableDesign():
 	return render_template('minimal-table.css')
+
 
 
 

@@ -8,8 +8,9 @@
     <title>Document</title>
 </head>
 <body>
-        <h2>All photos - {{tag}}</h2>
-        <a href="{{tag}}/yours/"><h5>Your Photos</h5></a>
+        <h2>Your photos - {{tag}}</h2>
+        <a href="/tags/{{tag}}"><h5>All Photos</h5></a>
+
         <ul>
             {% for photo in photos %}
             <li>
