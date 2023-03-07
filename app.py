@@ -396,7 +396,7 @@ def userAlbums():
 	cursor = conn.cursor()
 	cursor.execute("SELECT album_id, albumname FROM Albums WHERE user_id = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
 	albumsv = cursor.fetchall()
-	albums_list = [(row[1], "albums/" + str(row[0])) for row in albumsv]
+	albums_list = [(row[1], str(row[0])) for row in albumsv]
 	return render_template('userAlbums.html', albums=albums_list)
 
 @app.route('/userAlbums', methods=['POST'])
@@ -409,7 +409,7 @@ def add_album():
 	conn.commit()
 	cursor.execute("SELECT album_id, albumname FROM Albums WHERE user_id = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
 	albumsv = cursor.fetchall()
-	albums_list = [(row[1],"albums/" + str(row[0])) for row in albumsv]
+	albums_list = [(row[1], row[0]) for row in albumsv]
 	return render_template('userAlbums.html', albums=albums_list)
 
 @app.route('/modifyAlbums', methods=['GET'])
@@ -573,7 +573,7 @@ def upload_file():
 		print(selected_album)
 		cursor.execute("INSERT INTO Pictures (imgdata, user_id, caption) VALUES (%s, %s, %s )", (photo_data, uid, caption))
 		conn.commit()
-		cursor.execute("SELECT album_id FROM Albums WHERE albumname = '{0}' AND user_id = '{1}'".format(selected_album, uid))
+		cursor.execute("SELECT album_id FROM Albums WHERE albumname = '{0}'".format(selected_album))
 		aid = cursor.fetchall()
 		cursor.execute("SELECT picture_id FROM Pictures WHERE user_id = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
 		pid = cursor.fetchall()
