@@ -219,7 +219,6 @@ def add_comment(subpath):
 		try:
 			user = flask_login.current_user.id
 			if "photo" in subpath:
-				print("gggggggg")
 				picture_id = request.form.get('picture_id')
 				uid = getUserIdFromEmail(flask_login.current_user.id)
 				addcomment = request.form.get('addcomment')
@@ -706,7 +705,6 @@ def search_comment():
 	# cursor.execute("SELECT email FROM Users WHERE user_id IN (SELECT user_id FROM Made WHERE comment_id IN (SELECT comment_id FROM Comments WHERE text = '{0}'))".format(comment))
 	cursor.execute("SELECT Users.email, COUNT(*) FROM Users INNER JOIN Made ON Users.user_id = Made.user_id INNER JOIN Comments ON Made.comment_id = Comments.comment_id WHERE Comments.text = '{0}' GROUP BY Users.email".format(comment))
 	commentv = cursor.fetchall()
-	print(commentv)
 	sorted_data = sorted(commentv, key=lambda x: x[1], reverse=True)
 	sorted_emails = [x[0] for x in sorted_data]
 	print(sorted_emails)
