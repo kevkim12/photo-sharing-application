@@ -600,6 +600,15 @@ def display_albums():
 def display_photosearch():
 	return render_template('photosearch.html')
 
+@app.route('/photosearch', methods=['POST'])
+def search_tag():
+	tags = request.form.get("tagSearch")
+	tag_split = tags.split()
+	arr = ()
+	for word in tag_split:
+		arr = arr + getTagPhotos(word)
+	return render_template('photosearch.html', photos = arr, base64=base64)
+
 @app.route('/tags/<path:subpath>', methods=['GET'])
 def display_tag_photos(subpath):
 	if "yours" in subpath:
