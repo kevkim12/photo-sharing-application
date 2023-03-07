@@ -322,43 +322,73 @@ def add_unlike(subpath):
 @app.route('/albums/<path:subpath>', methods=['GET'])
 def display_photos(subpath):
 	print(subpath)
-	if "likes" in subpath:
-		ns = re.findall('\d+', subpath)
-		cursor.execute("SELECT email FROM Users WHERE user_id IN (SELECT user_id FROM Likes WHERE picture_id = '{0}')".format(ns[0]))
-		likesv = cursor.fetchall()
-		likes_list = [(row[0]) for row in likesv]
-		print(likes_list)
-		return render_template('likes.html', likesby = likes_list)
-	elif "photo" in subpath:
-		ns = re.findall('\d+', subpath)
-		nosame = True
-		#for individual photos
-		cursor.execute("SELECT user_id FROM Pictures WHERE picture_id = '{0}'".format(ns[0]))
-		userv = cursor.fetchall()
-		if userv[0][0] == getUserIdFromEmail(flask_login.current_user.id):
-				nosame = False
-		cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(ns[0]))
-		commentsv = cursor.fetchall()
-		comments_list = [(row[0]) for row in commentsv]
-		cursor.execute("SELECT user_id, picture_id FROM Likes WHERE user_id = '{0}' AND picture_id = '{1}'".format(getUserIdFromEmail(flask_login.current_user.id), ns[0]))
-		studd = cursor.fetchall()
-		if len(studd) == 0:
-			liked = False
+	try:
+		user = flask_login.current_user.id
+		if "likes" in subpath:
+			ns = re.findall('\d+', subpath)
+			cursor.execute("SELECT email FROM Users WHERE user_id IN (SELECT user_id FROM Likes WHERE picture_id = '{0}')".format(ns[0]))
+			likesv = cursor.fetchall()
+			likes_list = [(row[0]) for row in likesv]
+			print(likes_list)
+			return render_template('likes.html', likesby = likes_list)
+		elif "photo" in subpath:
+			ns = re.findall('\d+', subpath)
+			nosame = True
+			#for individual photos
+			cursor.execute("SELECT user_id FROM Pictures WHERE picture_id = '{0}'".format(ns[0]))
+			userv = cursor.fetchall()
+			print(flask_login.current_user)
+			if userv[0][0] == getUserIdFromEmail(flask_login.current_user.id):
+					nosame = False
+			cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(ns[0]))
+			commentsv = cursor.fetchall()
+			comments_list = [(row[0]) for row in commentsv]
+			cursor.execute("SELECT user_id, picture_id FROM Likes WHERE user_id = '{0}' AND picture_id = '{1}'".format(getUserIdFromEmail(flask_login.current_user.id), ns[0]))
+			studd = cursor.fetchall()
+			if len(studd) == 0:
+				liked = False
+			else:
+				liked = True
+
+			cursor.execute("SELECT SUM(1) FROM Likes WHERE picture_id = '{0}'".format(ns[0]))
+			totalLikes = cursor.fetchall()[0][0]
+
+			cursor.execute("SELECT word FROM Associate WHERE picture_id = '{0}'".format(ns[0]))
+			tags = cursor.fetchall()
+			tags_list = [(row[0]) for row in tags]
+
+
+			return render_template('photo.html', photo=getPhotoDetails(ns[0]), comments=comments_list, notsame=nosame,liked=liked, totalLikes=totalLikes, tags=tags_list, base64=base64)
 		else:
-			liked = True
+			#for albums
+			return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
+	except:
+		if "likes" in subpath:
+			ns = re.findall('\d+', subpath)
+			cursor.execute("SELECT email FROM Users WHERE user_id IN (SELECT user_id FROM Likes WHERE picture_id = '{0}')".format(ns[0]))
+			likesv = cursor.fetchall()
+			likes_list = [(row[0]) for row in likesv]
+			print(likes_list)
+			return render_template('likes.html', likesby = likes_list)
+		elif "photo" in subpath:
+			ns = re.findall('\d+', subpath)
+			nosame = True
+			#for individual photos
+			cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(ns[0]))
+			commentsv = cursor.fetchall()
+			comments_list = [(row[0]) for row in commentsv]
 
-		cursor.execute("SELECT SUM(1) FROM Likes WHERE picture_id = '{0}'".format(ns[0]))
-		totalLikes = cursor.fetchall()[0][0]
+			cursor.execute("SELECT SUM(1) FROM Likes WHERE picture_id = '{0}'".format(ns[0]))
+			totalLikes = cursor.fetchall()[0][0]
 
-		cursor.execute("SELECT word FROM Associate WHERE picture_id = '{0}'".format(ns[0]))
-		tags = cursor.fetchall()
-		tags_list = [(row[0]) for row in tags]
+			cursor.execute("SELECT word FROM Associate WHERE picture_id = '{0}'".format(ns[0]))
+			tags = cursor.fetchall()
+			tags_list = [(row[0]) for row in tags]
+			return render_template('photovisitor.html', photo=getPhotoDetails(ns[0]), comments=comments_list, totalLikes=totalLikes, tags=tags_list, base64=base64)
+		else:
+			#for albums
+			return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
 
-
-		return render_template('photo.html', photo=getPhotoDetails(ns[0]), comments=comments_list, notsame=nosame,liked=liked, totalLikes=totalLikes, tags=tags_list, base64=base64)
-	else:
-		#for albums
-		return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
 
 @app.route('/userAlbums', methods=['GET'])
 @flask_login.login_required
@@ -615,7 +645,11 @@ def display_tag_photos(subpath):
 		tag = subpath.split("/")[0]
 		return render_template('tagsyours.html', photos=getUserTagPhotos(tag), tag=tag, base64=base64)
 	else:
-		return render_template('tags.html', photos=getTagPhotos(subpath),tag=subpath, base64=base64)
+		try:
+			user = flask_login.current_user.id
+			return render_template('tags.html', photos=getTagPhotos(subpath),tag=subpath,cansee = True, base64=base64)
+		except:
+			return render_template('tags.html', photos=getTagPhotos(subpath),tag=subpath,cansee = False, base64=base64)
 	
 
 
@@ -648,6 +682,7 @@ def search_comment():
 	return render_template('comments.html', comments = sorted_emails, text=comment)
 
 @app.route("/photoRecs", methods=['Get'])
+@flask_login.login_required
 def display_photoRecs():
 	cursor = conn.cursor()
 	tag_query = "SELECT word, COUNT(*) AS tag_count FROM Associate JOIN Pictures ON Associate.picture_id = Pictures.picture_id WHERE Pictures.user_id = '{user_id}' GROUP BY word ORDER BY tag_count DESC LIMIT 3"

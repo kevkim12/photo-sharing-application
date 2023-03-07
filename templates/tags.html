@@ -9,7 +9,9 @@
 </head>
 <body>
         <h2>All photos - {{tag}}</h2>
-        <a href="{{tag}}/yours/"><h5>Your Photos</h5></a>
+        {% if cansee %}
+            <a href="{{tag}}/yours/"><h5>Your Photos</h5></a>
+        {% endif %}
         <ul>
             {% for photo in photos %}
             <li>
