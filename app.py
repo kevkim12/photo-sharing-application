@@ -216,45 +216,76 @@ def protected():
 	return render_template('hello.html', name=flask_login.current_user.id, message="Here's your profile")
 @app.route('/albums/<path:subpath>/add_comment', methods=['POST'])
 def add_comment(subpath):
-		if "photo" in subpath:
-			print("gggggggg")
-			picture_id = request.form.get('picture_id')
-			uid = getUserIdFromEmail(flask_login.current_user.id)
-			addcomment = request.form.get('addcomment')
-			cursor = conn.cursor()
-			cursor.execute("INSERT INTO Comments (text) VALUES ('{0}')".format(addcomment))
-			conn.commit()
-			cursor.execute("SELECT comment_id FROM Comments WHERE text = '{0}'".format(addcomment))
-			cid = cursor.fetchall()
-			cidNew = max(cid)[0]
-			cursor.execute("INSERT INTO Has (comment_id, picture_id) VALUES ('{0}', '{1}')".format(cidNew, picture_id))
-			conn.commit()
-			cursor.execute("INSERT INTO Made (user_id, comment_id) VALUES ('{0}', '{1}')".format(getUserIdFromEmail(flask_login.current_user.id), cidNew))
-			conn.commit()
-			cursor.execute("UPDATE Users Set score = score + 1 WHERE user_id = '{0}'".format(uid))
-			conn.commit()
-			cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(picture_id))
-			commentsv = cursor.fetchall()
-			comments_list = [(row[0]) for row in commentsv]
+		try:
+			user = flask_login.current_user.id
+			if "photo" in subpath:
+				print("gggggggg")
+				picture_id = request.form.get('picture_id')
+				uid = getUserIdFromEmail(flask_login.current_user.id)
+				addcomment = request.form.get('addcomment')
+				cursor = conn.cursor()
+				cursor.execute("INSERT INTO Comments (text) VALUES ('{0}')".format(addcomment))
+				conn.commit()
+				cursor.execute("SELECT comment_id FROM Comments WHERE text = '{0}'".format(addcomment))
+				cid = cursor.fetchall()
+				cidNew = max(cid)[0]
+				cursor.execute("INSERT INTO Has (comment_id, picture_id) VALUES ('{0}', '{1}')".format(cidNew, picture_id))
+				conn.commit()
+				cursor.execute("INSERT INTO Made (user_id, comment_id) VALUES ('{0}', '{1}')".format(getUserIdFromEmail(flask_login.current_user.id), cidNew))
+				conn.commit()
+				cursor.execute("UPDATE Users Set score = score + 1 WHERE user_id = '{0}'".format(uid))
+				conn.commit()
+				cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(picture_id))
+				commentsv = cursor.fetchall()
+				comments_list = [(row[0]) for row in commentsv]
 
-			cursor.execute("SELECT user_id, picture_id FROM Likes WHERE user_id = '{0}' AND picture_id = '{1}'".format(getUserIdFromEmail(flask_login.current_user.id), picture_id))
-			studd = cursor.fetchall()
-			if len(studd) == 0:
-				liked = False
+				cursor.execute("SELECT user_id, picture_id FROM Likes WHERE user_id = '{0}' AND picture_id = '{1}'".format(getUserIdFromEmail(flask_login.current_user.id), picture_id))
+				studd = cursor.fetchall()
+				if len(studd) == 0:
+					liked = False
+				else:
+					liked = True
+
+				cursor.execute("SELECT SUM(1) FROM Likes WHERE picture_id = '{0}'".format(picture_id))
+				totalLikes = cursor.fetchall()[0][0]
+
+				cursor.execute("SELECT word FROM Associate WHERE picture_id = '{0}'".format(picture_id))
+				tags = cursor.fetchall()
+				tags_list = [(row[0]) for row in tags]
+				return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=True, liked=liked, totalLikes=totalLikes, tags=tags_list, base64=base64)
 			else:
-				liked = True
+				#for albums
+				print("<><><><><>><")
+				return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
+		except:
+			if "photo" in subpath:
+				picture_id = request.form.get('picture_id')
+				addcomment = request.form.get('addcomment')
+				cursor = conn.cursor()
+				cursor.execute("INSERT INTO Comments (text) VALUES ('{0}')".format(addcomment))
+				conn.commit()
+				cursor.execute("SELECT comment_id FROM Comments WHERE text = '{0}'".format(addcomment))
+				cid = cursor.fetchall()
+				cidNew = max(cid)[0]
+				cursor.execute("INSERT INTO Has (comment_id, picture_id) VALUES ('{0}', '{1}')".format(cidNew, picture_id))
+				conn.commit()
+				cursor.execute("SELECT text FROM Comments WHERE comment_id IN (SELECT comment_id FROM Has WHERE picture_id = '{0}')".format(picture_id))
+				commentsv = cursor.fetchall()
+				comments_list = [(row[0]) for row in commentsv]
 
-			cursor.execute("SELECT SUM(1) FROM Likes WHERE picture_id = '{0}'".format(picture_id))
-			totalLikes = cursor.fetchall()[0][0]
 
-			cursor.execute("SELECT word FROM Associate WHERE picture_id = '{0}'".format(picture_id))
-			tags = cursor.fetchall()
-			tags_list = [(row[0]) for row in tags]
-			return render_template('photo.html', photo=getPhotoDetails(picture_id), comments=comments_list, notsame=True, liked=liked, totalLikes=totalLikes, tags=tags_list, base64=base64)
-		else:
-			#for albums
-			print("<><><><><>><")
-			return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
+				cursor.execute("SELECT SUM(1) FROM Likes WHERE picture_id = '{0}'".format(picture_id))
+				totalLikes = cursor.fetchall()[0][0]
+
+				cursor.execute("SELECT word FROM Associate WHERE picture_id = '{0}'".format(picture_id))
+				tags = cursor.fetchall()
+				tags_list = [(row[0]) for row in tags]
+				return render_template('photovisitor.html', photo=getPhotoDetails(picture_id), comments=comments_list, totalLikes=totalLikes, tags=tags_list, base64=base64)
+			else:
+				#for albums
+				print("<><><><><>><")
+				return render_template('photos.html', photos=getAlbumPhotos(subpath), base64=base64)
+
 
 @app.route('/albums/<path:subpath>/add_like', methods=['POST'])
 def add_like(subpath):
