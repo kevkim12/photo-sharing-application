@@ -409,7 +409,7 @@ def add_album():
 	conn.commit()
 	cursor.execute("SELECT album_id, albumname FROM Albums WHERE user_id = '{0}'".format(getUserIdFromEmail(flask_login.current_user.id)))
 	albumsv = cursor.fetchall()
-	albums_list = [(row[1], "albums/" + row[0]) for row in albumsv]
+	albums_list = [(row[1], "albums/" + str(row[0])) for row in albumsv]
 	return render_template('userAlbums.html', albums=albums_list)
 
 @app.route('/modifyAlbums', methods=['GET'])
