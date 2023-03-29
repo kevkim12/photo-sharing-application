@@ -6,8 +6,8 @@ The Photo Sharing App is a web-based application that allows users to create pho
 
 ## Technologies
 This project is created with:
-Python version 3.9.7
-Flask version 2.2.3
-HTML
-CSS
-JavaScript
+* Python version 3.9.7
+* Flask version 2.2.3
+* HTML
+* CSS
+* JavaScript
