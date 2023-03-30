@@ -11,4 +11,5 @@ This project is created with:
 * HTML
 * CSS
 * JavaScript
+* MySQL
 * SQL
